@@ -1,0 +1,48 @@
+parameter (or (nat %default) (unit %request_randomness));
+storage   (pair (address %random_bridge) (nat %randomness));
+code
+  {
+    DUP;
+    CDR;
+    SWAP;
+    CAR;
+    IF_LEFT
+      {
+        SWAP;
+        DUP;
+        DUG 2;
+        CAR;
+        SENDER;
+        COMPARE;
+        EQ;
+        IF
+          {}
+          {
+            PUSH string WrongCondition: sp.sender == self.data.random_bridge;
+            FAILWITH;
+          };
+        SWAP;
+        CAR;
+        PAIR;
+        NIL operation;
+      }
+      {
+        DROP;
+        DUP;
+        CAR;
+        CONTRACT %request_randomness unit;
+        NIL operation;
+        SWAP;
+        IF_SOME
+          {}
+          {
+            PUSH int 12;
+            FAILWITH;
+          };
+        PUSH mutez 0;
+        UNIT;
+        TRANSFER_TOKENS;
+        CONS;
+      };
+    PAIR;
+  };
